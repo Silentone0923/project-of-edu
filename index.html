@@ -4,24 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>專一機甲：沃爾帕諾瓦重裝開發日誌</title>
-    <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- 自訂 Tailwind 設定 -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
                         mecha: {
-                            dark: '#232720',    // 深邃裝甲底色
-                            surface: '#31372c', // 介面卡片底色
-                            accent: '#9ca986',  // 機甲本體沙綠色
-                            tire: '#2a2b26',    // 輪胎碳黑色
-                            sensor: '#0edbad',  // 感測器亮青色
-                            text: '#e2e5de',    // 主要文字
-                            muted: '#8e9684'    // 次要文字
+                            dark: '#232720',    
+                            surface: '#31372c', 
+                            accent: '#9ca986',  
+                            tire: '#2a2b26',    
+                            sensor: '#0edbad',  
+                            text: '#e2e5de',    
+                            muted: '#8e9684'    
                         }
                     },
                     fontFamily: {
@@ -33,26 +30,16 @@
         }
     </script>
     <style>
-        /* 隱藏捲軸但保留捲動功能 */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #232720; }
         ::-webkit-scrollbar-thumb { background: #545e4b; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #0edbad; } 
-        
         ::selection { background-color: #0edbad; color: #232720; font-weight: bold; }
         
-        /* 內容區塊預設透明，防止閃爍 (FOUC) */
         .content-section { opacity: 0; display: none; }
         .content-section.active-section { display: block; }
-        
-        /* 機械感抬升淡入 (新章節進場) */
-        .fade-in {
-            animation: mechLift 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-        }
-        /* 機械感下沉淡出 (舊章節退場) */
-        .fade-out {
-            animation: mechDrop 0.25s cubic-bezier(0.4, 0, 1, 1) forwards;
-        }
+        .fade-in { animation: mechLift 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        .fade-out { animation: mechDrop 0.25s cubic-bezier(0.4, 0, 1, 1) forwards; }
 
         @keyframes mechLift {
             0% { opacity: 0; transform: translateY(30px); clip-path: polygon(0 100%, 100% 100%, 100% 100%, 0 100%); }
@@ -63,17 +50,13 @@
             100% { opacity: 0; transform: translateY(-15px); }
         }
 
-        /* 機器人指示器動畫 */
         @keyframes floatBot {
             0%, 100% { transform: translateY(0); text-shadow: 0 0 5px rgba(14, 219, 173, 0.5); }
             50% { transform: translateY(-4px); text-shadow: 0 0 15px rgba(14, 219, 173, 0.9); }
         }
         .robot-indicator { opacity: 0; transform: translateX(-10px); transition: all 0.3s ease; }
-        .active-nav .robot-indicator {
-            opacity: 1; transform: translateX(0); color: #0edbad; animation: floatBot 2s ease-in-out infinite;
-        }
+        .active-nav .robot-indicator { opacity: 1; transform: translateX(0); color: #0edbad; animation: floatBot 2s ease-in-out infinite; }
 
-        /* HUD 光學觀景窗 */
         .hud-viewfinder { position: relative; }
         .hud-viewfinder::before, .hud-viewfinder::after {
             content: ''; position: absolute; width: 20px; height: 20px; border-color: #0edbad; transition: all 0.3s; opacity: 0.5; pointer-events: none; z-index: 10;
@@ -82,152 +65,113 @@
         .hud-viewfinder::after { bottom: 0; right: 0; border-bottom: 2px solid; border-right: 2px solid; }
         .hud-viewfinder:hover::before, .hud-viewfinder:hover::after { width: 30px; height: 30px; opacity: 1; }
 
-        /* 掃描線濾鏡 */
-        .scanlines {
-            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
-            background-size: 100% 4px; pointer-events: none; z-index: 50;
-        }
-
-        /* 警示條紋背景 (用於按鈕懸停) */
-        .bg-caution-stripes {
-            background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(156,169,134,0.1) 10px, rgba(156,169,134,0.1) 20px);
+        .scanlines { background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1)); background-size: 100% 4px; pointer-events: none; z-index: 50; }
+        .bg-caution-stripes { background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(156,169,134,0.1) 10px, rgba(156,169,134,0.1) 20px); }
+        
+        /* 側邊欄隱藏邏輯：改用負 margin 而非改變寬度，避免文字擠壓 */
+        @media (min-width: 768px) {
+            #sidebar.sidebar-hidden { margin-left: -18rem; }
         }
     </style>
 </head>
-<body class="bg-mecha-dark text-mecha-text font-sans antialiased overflow-hidden flex h-screen relative">
+<body class="bg-mecha-dark text-mecha-text font-sans antialiased flex h-screen overflow-hidden relative">
 
-    <div class="scanlines absolute inset-0 mix-blend-overlay"></div>
+    <div class="scanlines absolute inset-0 mix-blend-overlay pointer-events-none"></div>
 
-    <header class="md:hidden fixed top-0 left-0 right-0 h-16 bg-mecha-surface border-b border-[#434b3c] z-50 flex items-center justify-between px-4 shadow-md">
+    <!-- 手機版 Header -->
+    <header class="md:hidden fixed top-0 left-0 right-0 h-16 bg-mecha-surface border-b border-[#434b3c] z-40 flex items-center justify-between px-4 shadow-md">
         <div class="flex items-center gap-2 text-mecha-sensor font-mono font-bold">
             <i data-lucide="crosshair" class="w-6 h-6"></i>
             <span>沃爾帕諾瓦 SYS</span>
         </div>
-        <button id="mobile-menu-btn" class="text-mecha-text hover:text-mecha-sensor focus:outline-none">
+        <button id="mobile-menu-btn" class="text-mecha-text hover:text-mecha-sensor focus:outline-none p-2">
             <i data-lucide="menu" class="w-6 h-6"></i>
         </button>
     </header>
 
-    <nav id="sidebar" class="fixed inset-y-0 left-0 z-40 w-72 bg-mecha-surface border-r border-[#434b3c] transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col mt-16 md:mt-0 shadow-lg relative overflow-hidden">
+    <!-- 側邊選單 -->
+    <nav id="sidebar" class="fixed inset-y-0 left-0 z-50 w-72 bg-mecha-surface border-r border-[#434b3c] transform -translate-x-full md:relative md:translate-x-0 transition-all duration-300 ease-in-out flex flex-col mt-16 md:mt-0 shadow-lg shrink-0">
         <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-mecha-sensor to-transparent opacity-50"></div>
+        
+        <button id="hide-sidebar-btn" class="hidden md:flex absolute top-4 right-4 text-mecha-muted hover:text-mecha-sensor transition-colors z-20 p-1 bg-black/20 rounded" title="隱藏介面">
+            <i data-lucide="minus-square" class="w-5 h-5"></i>
+        </button>
 
         <div class="hidden md:flex p-6 border-b border-[#434b3c] items-start flex-col gap-2 relative">
             <div class="text-mecha-sensor font-mono text-xs tracking-widest flex items-center gap-2">
                 <span class="w-2 h-2 bg-mecha-sensor rounded-full animate-pulse"></span>
                 [ SYS.ONLINE ]
             </div>
-            <h1 class="text-xl font-bold leading-tight mt-1 text-white">專一機甲<br><span class="text-sm font-normal text-mecha-muted">沃爾帕諾瓦重裝開發日誌</span></h1>
+            <h1 class="text-xl font-bold leading-tight mt-1 text-white pr-6">專一機甲<br><span class="text-sm font-normal text-mecha-muted">沃爾帕諾瓦重裝開發日誌</span></h1>
         </div>
 
-        <div class="flex-1 overflow-y-auto py-4 relative z-10">
+        <div class="flex-1 overflow-y-auto py-4 relative z-10 scroll-smooth">
             <ul class="space-y-1 px-3" id="nav-menu">
-                <li>
-                    <a href="#chapter-1" data-target="chapter-1" class="nav-link flex items-center gap-3 px-4 py-3 rounded-md text-mecha-muted hover:bg-black/20 hover:text-white transition-colors active-nav">
-                        <i data-lucide="terminal-square" class="w-5 h-5 shrink-0"></i>
-                        <span class="text-sm font-medium">Ch1. AI 協同網頁建置</span>
-                        <i data-lucide="bot" class="w-5 h-5 ml-auto robot-indicator shrink-0"></i>
-                    </a>
-                </li>
-                <li>
-                    <a href="#chapter-2" data-target="chapter-2" class="nav-link flex items-center gap-3 px-4 py-3 rounded-md text-mecha-muted hover:bg-black/20 hover:text-white transition-colors">
-                        <i data-lucide="crosshair" class="w-5 h-5 shrink-0"></i>
-                        <span class="text-sm font-medium">Ch2. 開發動機與核心理念</span>
-                        <i data-lucide="bot" class="w-5 h-5 ml-auto robot-indicator shrink-0"></i>
-                    </a>
-                </li>
-                <li>
-                    <a href="#chapter-3" data-target="chapter-3" class="nav-link flex items-center gap-3 px-4 py-3 rounded-md text-mecha-muted hover:bg-black/20 hover:text-white transition-colors">
-                        <i data-lucide="box" class="w-5 h-5 shrink-0"></i>
-                        <span class="text-sm font-medium">Ch3. 武裝圖鑑與模組配置</span>
-                        <i data-lucide="bot" class="w-5 h-5 ml-auto robot-indicator shrink-0"></i>
-                    </a>
-                </li>
-                <li>
-                    <a href="#chapter-4" data-target="chapter-4" class="nav-link flex items-center gap-3 px-4 py-3 rounded-md text-mecha-muted hover:bg-black/20 hover:text-white transition-colors">
-                        <i data-lucide="settings" class="w-5 h-5 shrink-0"></i>
-                        <span class="text-sm font-medium">Ch4. 變形機構展示</span>
-                        <i data-lucide="bot" class="w-5 h-5 ml-auto robot-indicator shrink-0"></i>
-                    </a>
-                </li>
-                <li>
-                    <a href="#chapter-5" data-target="chapter-5" class="nav-link flex items-center gap-3 px-4 py-3 rounded-md text-mecha-muted hover:bg-black/20 hover:text-white transition-colors">
-                        <i data-lucide="brain-circuit" class="w-5 h-5 shrink-0"></i>
-                        <span class="text-sm font-medium">Ch5. AI 協同開發紀錄</span>
-                        <i data-lucide="bot" class="w-5 h-5 ml-auto robot-indicator shrink-0"></i>
-                    </a>
-                </li>
-                <li>
-                    <a href="#chapter-6" data-target="chapter-6" class="nav-link flex items-center gap-3 px-4 py-3 rounded-md text-mecha-muted hover:bg-black/20 hover:text-white transition-colors">
-                        <i data-lucide="book-open" class="w-5 h-5 shrink-0"></i>
-                        <span class="text-sm font-medium">Ch6. 學理剖析總結</span>
-                        <i data-lucide="bot" class="w-5 h-5 ml-auto robot-indicator shrink-0"></i>
-                    </a>
-                </li>
+                <li><a href="#chapter-1" data-target="chapter-1" class="nav-link flex items-center gap-3 px-4 py-3 rounded-md text-mecha-muted hover:bg-black/20 hover:text-white transition-colors active-nav"><i data-lucide="terminal-square" class="w-5 h-5 shrink-0"></i><span class="text-sm font-medium">Ch1. AI 協同網頁建置</span><i data-lucide="bot" class="w-5 h-5 ml-auto robot-indicator shrink-0"></i></a></li>
+                <li><a href="#chapter-2" data-target="chapter-2" class="nav-link flex items-center gap-3 px-4 py-3 rounded-md text-mecha-muted hover:bg-black/20 hover:text-white transition-colors"><i data-lucide="crosshair" class="w-5 h-5 shrink-0"></i><span class="text-sm font-medium">Ch2. 開發動機與核心理念</span><i data-lucide="bot" class="w-5 h-5 ml-auto robot-indicator shrink-0"></i></a></li>
+                <li><a href="#chapter-3" data-target="chapter-3" class="nav-link flex items-center gap-3 px-4 py-3 rounded-md text-mecha-muted hover:bg-black/20 hover:text-white transition-colors"><i data-lucide="box" class="w-5 h-5 shrink-0"></i><span class="text-sm font-medium">Ch3. 武裝圖鑑與模組配置</span><i data-lucide="bot" class="w-5 h-5 ml-auto robot-indicator shrink-0"></i></a></li>
+                <li><a href="#chapter-4" data-target="chapter-4" class="nav-link flex items-center gap-3 px-4 py-3 rounded-md text-mecha-muted hover:bg-black/20 hover:text-white transition-colors"><i data-lucide="settings" class="w-5 h-5 shrink-0"></i><span class="text-sm font-medium">Ch4. 變形機構展示</span><i data-lucide="bot" class="w-5 h-5 ml-auto robot-indicator shrink-0"></i></a></li>
+                <li><a href="#chapter-5" data-target="chapter-5" class="nav-link flex items-center gap-3 px-4 py-3 rounded-md text-mecha-muted hover:bg-black/20 hover:text-white transition-colors"><i data-lucide="brain-circuit" class="w-5 h-5 shrink-0"></i><span class="text-sm font-medium">Ch5. AI 協同開發紀錄</span><i data-lucide="bot" class="w-5 h-5 ml-auto robot-indicator shrink-0"></i></a></li>
+                <li><a href="#chapter-6" data-target="chapter-6" class="nav-link flex items-center gap-3 px-4 py-3 rounded-md text-mecha-muted hover:bg-black/20 hover:text-white transition-colors"><i data-lucide="book-open" class="w-5 h-5 shrink-0"></i><span class="text-sm font-medium">Ch6. 學理剖析總結</span><i data-lucide="bot" class="w-5 h-5 ml-auto robot-indicator shrink-0"></i></a></li>
             </ul>
         </div>
         
-        <!-- 動態系統進度條 -->
-        <div class="p-4 border-t border-[#434b3c] text-[10px] text-mecha-muted font-mono bg-mecha-tire relative z-10">
+        <div class="p-4 border-t border-[#434b3c] text-[10px] text-mecha-muted font-mono bg-mecha-tire relative z-10 shrink-0">
             <div class="flex justify-between items-center mb-2">
                 <span class="text-mecha-text font-bold tracking-wider">PROJECT: 愛的饗宴</span>
-                <span class="text-mecha-sensor drop-shadow-[0_0_3px_#0edbad]">V_1.0.4</span>
+                <span class="text-mecha-sensor drop-shadow-[0_0_3px_#0edbad]" id="sys-version">V_1.0.6</span>
             </div>
-            <!-- 將由 JS 動態控制長度的 6 區塊裝載條 -->
-            <div class="flex gap-1 h-1.5 w-full" id="progress-container">
-                <div class="progress-block flex-1 bg-[#434b3c] rounded-[1px] overflow-hidden relative"><div class="progress-fill absolute inset-0 bg-mecha-sensor origin-left transition-transform duration-500 scale-x-100"></div></div>
-                <div class="progress-block flex-1 bg-[#434b3c] rounded-[1px] overflow-hidden relative"><div class="progress-fill absolute inset-0 bg-mecha-sensor origin-left transition-transform duration-500 scale-x-0"></div></div>
-                <div class="progress-block flex-1 bg-[#434b3c] rounded-[1px] overflow-hidden relative"><div class="progress-fill absolute inset-0 bg-mecha-sensor origin-left transition-transform duration-500 scale-x-0"></div></div>
-                <div class="progress-block flex-1 bg-[#434b3c] rounded-[1px] overflow-hidden relative"><div class="progress-fill absolute inset-0 bg-mecha-sensor origin-left transition-transform duration-500 scale-x-0"></div></div>
-                <div class="progress-block flex-1 bg-[#434b3c] rounded-[1px] overflow-hidden relative"><div class="progress-fill absolute inset-0 bg-mecha-sensor origin-left transition-transform duration-500 scale-x-0"></div></div>
-                <div class="progress-block flex-1 bg-[#434b3c] rounded-[1px] overflow-hidden relative"><div class="progress-fill absolute inset-0 bg-mecha-sensor origin-left transition-transform duration-500 scale-x-0"></div></div>
+            <div class="w-full h-1.5 bg-[#434b3c] rounded-full overflow-hidden relative">
+                <div id="progress-fill" class="absolute top-0 left-0 h-full bg-mecha-sensor transition-all duration-700 ease-out" style="width: 16.66%;"></div>
             </div>
         </div>
     </nav>
 
-    <div id="sidebar-overlay" class="fixed inset-0 bg-mecha-tire bg-opacity-80 z-30 hidden md:hidden backdrop-blur-sm"></div>
+    <!-- 半透明掃描按鈕 (選單隱藏時顯示) -->
+    <button id="show-sidebar-btn" class="fixed left-0 top-1/2 -translate-y-1/2 bg-black/60 backdrop-blur-md border border-mecha-sensor hover:bg-mecha-sensor/20 text-mecha-sensor p-3 rounded-r-lg z-30 shadow-[0_0_15px_rgba(14,219,173,0.3)] group transition-transform duration-300 -translate-x-full flex items-center justify-center">
+        <i data-lucide="scan-line" class="w-6 h-6 animate-pulse group-hover:scale-110 transition-transform"></i>
+    </button>
 
-    <main class="flex-1 overflow-y-auto h-full pt-16 md:pt-0 bg-mecha-dark relative scroll-smooth shadow-[inset_10px_0_20px_rgba(0,0,0,0.5)]">
+    <div id="sidebar-overlay" class="fixed inset-0 bg-mecha-tire bg-opacity-80 z-40 hidden md:hidden backdrop-blur-sm"></div>
+
+    <main class="flex-1 overflow-y-auto h-full pt-16 md:pt-0 bg-mecha-dark relative scroll-smooth shadow-[inset_10px_0_20px_rgba(0,0,0,0.5)] transition-all duration-300 w-full">
         <div class="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(255,255,255,1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,1)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
 
-        <div class="max-w-4xl mx-auto p-6 md:p-12 pb-24 relative z-10">
+        <div class="max-w-5xl mx-auto p-5 md:p-12 pb-24 relative z-10">
             
             <!-- 章節一 -->
             <section id="chapter-1" class="content-section active-section fade-in">
                 <div class="mb-8 border-l-4 border-mecha-sensor pl-4 relative">
                     <div class="absolute -left-[6px] top-0 w-2 h-2 bg-mecha-sensor rounded-full shadow-[0_0_10px_#0edbad]"></div>
-                    <h2 class="text-3xl font-bold text-white mb-2 tracking-wide">AI 協同網頁建置</h2>
-                    <p class="text-mecha-sensor font-mono text-xs tracking-widest">CHAPTER 01 // WEB DEPLOYMENT & AI COLLABORATION</p>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mb-2 tracking-wide">AI 協同網頁建置</h2>
+                    <p class="text-mecha-sensor font-mono text-xs md:text-sm tracking-widest">CHAPTER 01 // WEB DEPLOYMENT & AI</p>
                 </div>
                 <div class="space-y-6 text-mecha-text leading-relaxed">
-                    <p class="text-lg">這個網頁本身，就是另一個完美印證「鷹架理論」的實作專案。為了將實體模型的設計理念與《愛的饗宴》的心得完整呈現，我決定跳脫傳統的紙本報告，改以具備軍武科技感的互動式網頁來作為最終載體。</p>
+                    <p class="text-base md:text-lg">這個網頁本身，就是另一個完美印證「鷹架理論」的實作專案。為了將實體模型的設計理念與《愛的饗宴》的心得完整呈現，我決定跳脫傳統的紙本報告，改以具備軍武科技感的互動式網頁來作為最終載體。</p>
                     
-                    <div class="bg-mecha-surface p-6 rounded-lg border border-[#434b3c] shadow-md mt-6 relative overflow-hidden group">
+                    <div class="bg-mecha-surface p-5 md:p-6 rounded-lg border border-[#434b3c] shadow-md mt-6 relative overflow-hidden group">
                         <div class="absolute top-0 right-0 w-16 h-16 border-t-2 border-r-2 border-[#434b3c] opacity-50 m-2 group-hover:border-mecha-sensor transition-colors duration-500"></div>
                         <h3 class="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-                            <i data-lucide="terminal" class="text-mecha-sensor"></i> 技術實踐與創作者聲明
+                            <i data-lucide="terminal" class="text-mecha-sensor w-5 h-5 md:w-6 md:h-6"></i> 技術實踐與創作者聲明
                         </h3>
-                        <div class="space-y-4 text-mecha-muted">
+                        <div class="space-y-4 text-mecha-muted text-sm md:text-base">
                             <p>
-                                由於我並非專業的前端工程師，從零開始撰寫單頁式應用程式 (SPA) 的難度遠超過我的「實際發展水平」。因此，我再次將 AI 作為我的「更有能力者 (MKO)」，請它為我搭建網頁的 HTML、Tailwind CSS 與 JavaScript 基礎架構，並調配出符合機甲塗裝的 <span class="text-mecha-accent font-bold">Sage Green</span> 與 <span class="text-mecha-tire font-bold px-1 bg-[#434b3c] rounded">Tire Black</span> 配色。
+                                由於我並非專業的前端工程師，從零開始撰寫單頁式應用程式 (SPA) 的難度遠超過我的「實際發展水平」。因此，我再次將 AI 作為我的「更有能力者 (MKO)」，請它為我搭建網頁的 HTML、Tailwind CSS 與 JavaScript 基礎架構，並調配出符合機甲塗裝的 <span class="text-mecha-dark font-bold px-1 bg-mecha-accent rounded">Sage Green</span> 與 <span class="text-[#1a1b18] font-bold px-1.5 py-0.5 bg-[#8e9684] rounded">Tire Black</span> 配色。
                             </p>
                             <div class="border-l-2 border-mecha-sensor pl-4 my-4 bg-mecha-tire p-4 rounded-r relative">
-                                <span class="absolute top-2 right-2 text-[10px] font-mono text-mecha-sensor opacity-50">[AUTH_VERIFIED]</span>
-                                <strong class="text-mecha-sensor block mb-1 font-mono tracking-wider">>> OWNERSHIP_STATEMENT</strong>
-                                <span class="text-white text-sm">
+                                <span class="hidden md:inline absolute top-2 right-2 text-[10px] font-mono text-mecha-sensor opacity-50">[AUTH_VERIFIED]</span>
+                                <strong class="text-mecha-sensor block mb-2 font-mono tracking-wider text-sm md:text-base">>> OWNERSHIP_STATEMENT</strong>
+                                <span class="text-white text-sm md:text-base block leading-relaxed">
                                 雖然底層的程式碼架構與視覺特效是由 AI 協助生成，但這個網頁中的<strong>每一段文字敘述</strong>、<strong>核心理念的論述</strong>，以及最終呈現的<strong>所有機甲照片與排版結構</strong>，皆是由我親自撰寫、拍攝與策劃。
                                 </span>
                             </div>
-                            <p>
-                                透過 AI 提供的技術鷹架，我得以跨越程式語言的門檻，將百分之百的精力集中在「內容創作」與「理念傳達」上。這不僅是一份期末作業，更是我在科技輔助下，將想像力具現化的一次成功嘗試。
-                            </p>
                         </div>
                     </div>
                 </div>
-                <!-- 戰術切換按鈕 -->
                 <div class="mt-12 flex justify-end border-t border-[#434b3c] pt-6">
                     <button class="next-phase-btn group relative px-6 py-3 bg-mecha-tire border-2 border-[#434b3c] hover:border-mecha-sensor overflow-hidden transition-all shadow-md" data-target="chapter-2">
                         <div class="absolute inset-0 bg-caution-stripes opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <div class="relative flex items-center gap-2 text-mecha-muted group-hover:text-mecha-sensor font-mono font-bold tracking-widest transition-colors">
+                        <div class="relative flex items-center gap-2 text-mecha-muted group-hover:text-mecha-sensor font-mono font-bold tracking-widest transition-colors text-sm md:text-base">
                             <span>NEXT_PHASE</span>
                             <i data-lucide="chevrons-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
                         </div>
@@ -238,36 +182,35 @@
             <!-- 章節二 -->
             <section id="chapter-2" class="content-section">
                 <div class="mb-8 border-l-4 border-mecha-accent pl-4 relative">
-                    <h2 class="text-3xl font-bold text-white mb-2 tracking-wide">開發動機與核心理念</h2>
-                    <p class="text-mecha-accent font-mono text-xs tracking-widest">CHAPTER 02 // CONCEPT & MOTIVATION</p>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mb-2 tracking-wide">開發動機與核心理念</h2>
+                    <p class="text-mecha-accent font-mono text-xs md:text-sm tracking-widest">CHAPTER 02 // CONCEPT & MOTIVATION</p>
                 </div>
                 <div class="prose prose-invert max-w-none text-mecha-text space-y-6 leading-relaxed">
-                    <p class="text-lg">在 30MM (30 Minutes Missions) 的自定義改裝世界中，我始終追求「極致的重火力」與「專一的功能性」。與其打造一台泛用型機體，我更傾向於賦予機體明確的戰術定位。</p>
-                    <div class="bg-mecha-surface p-6 rounded-lg border border-[#434b3c] shadow-inner relative">
+                    <p class="text-base md:text-lg">在 30MM (30 Minutes Missions) 的自定義改裝世界中，我始終追求「極致的重火力」與「專一的功能性」。與其打造一台泛用型機體，我更傾向於賦予機體明確的戰術定位。</p>
+                    <div class="bg-mecha-surface p-5 md:p-6 rounded-lg border border-[#434b3c] shadow-inner relative">
                         <div class="absolute left-0 top-1/2 w-1 h-12 bg-mecha-accent transform -translate-y-1/2"></div>
-                        <h3 class="text-xl font-semibold mb-3 flex items-center gap-2 text-white"><i data-lucide="target" class="w-5 h-5 text-mecha-accent"></i> 核心設計語彙</h3>
-                        <ul class="list-none space-y-3 text-mecha-muted">
-                            <li class="flex items-start gap-2">
-                                <span class="text-mecha-sensor font-mono mt-1 text-xs">[01]</span>
+                        <h3 class="text-xl font-semibold mb-4 flex items-center gap-2 text-white"><i data-lucide="target" class="w-5 h-5 text-mecha-accent"></i> 核心設計語彙</h3>
+                        <ul class="list-none space-y-4 text-mecha-muted text-sm md:text-base">
+                            <li class="flex items-start gap-3">
+                                <span class="text-mecha-sensor font-mono mt-0.5 text-xs bg-black/30 px-1 rounded border border-[#434b3c]">[01]</span>
                                 <div><strong class="text-[#c2ccb6]">火力壓制：</strong> 捨棄部分機動性，換取絕對的遠距離打擊能力。</div>
                             </li>
-                            <li class="flex items-start gap-2">
-                                <span class="text-mecha-sensor font-mono mt-1 text-xs">[02]</span>
+                            <li class="flex items-start gap-3">
+                                <span class="text-mecha-sensor font-mono mt-0.5 text-xs bg-black/30 px-1 rounded border border-[#434b3c]">[02]</span>
                                 <div><strong class="text-[#c2ccb6]">職責專一：</strong> 確保每一項武裝都有其存在的必要性，不作多餘的裝飾。</div>
                             </li>
-                            <li class="flex items-start gap-2">
-                                <span class="text-mecha-sensor font-mono mt-1 text-xs">[03]</span>
+                            <li class="flex items-start gap-3">
+                                <span class="text-mecha-sensor font-mono mt-0.5 text-xs bg-black/30 px-1 rounded border border-[#434b3c]">[03]</span>
                                 <div><strong class="text-[#c2ccb6]">功能極簡：</strong> 遵循實用主義，外觀的俐落感源自於機械結構的合理性。</div>
                             </li>
                         </ul>
                     </div>
-                    <p>這不僅是一次模型的物理拼裝，更是一場關於「選擇與專注」的思維訓練。在期末作業《愛的饗宴》的框架下，我將這份專注轉化為對學習歷程的具象化呈現。</p>
+                    <p class="text-sm md:text-base">這不僅是一次模型的物理拼裝，更是一場關於「選擇與專注」的思維訓練。在期末作業《愛的饗宴》的框架下，我將這份專注轉化為對學習歷程的具象化呈現。</p>
                 </div>
-                <!-- 戰術切換按鈕 -->
                 <div class="mt-12 flex justify-end border-t border-[#434b3c] pt-6">
                     <button class="next-phase-btn group relative px-6 py-3 bg-mecha-tire border-2 border-[#434b3c] hover:border-mecha-sensor overflow-hidden transition-all shadow-md" data-target="chapter-3">
                         <div class="absolute inset-0 bg-caution-stripes opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <div class="relative flex items-center gap-2 text-mecha-muted group-hover:text-mecha-sensor font-mono font-bold tracking-widest transition-colors">
+                        <div class="relative flex items-center gap-2 text-mecha-muted group-hover:text-mecha-sensor font-mono font-bold tracking-widest transition-colors text-sm md:text-base">
                             <span>NEXT_PHASE</span>
                             <i data-lucide="chevrons-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
                         </div>
@@ -278,60 +221,85 @@
             <!-- 章節三 -->
             <section id="chapter-3" class="content-section">
                 <div class="mb-8 border-l-4 border-mecha-accent pl-4">
-                    <h2 class="text-3xl font-bold text-white mb-2 tracking-wide">武裝圖鑑與模組配置</h2>
-                    <p class="text-mecha-accent font-mono text-xs tracking-widest">CHAPTER 03 // WEAPONRY & MODULES</p>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mb-2 tracking-wide">武裝圖鑑與模組配置</h2>
+                    <p class="text-mecha-accent font-mono text-xs md:text-sm tracking-widest">CHAPTER 03 // WEAPONRY & MODULES</p>
                 </div>
-                <div class="space-y-8">
-                    <p class="text-lg text-mecha-text leading-relaxed">本機體以 <strong>bEXM-33QB 沃爾帕諾瓦 (Volpanova)</strong> 為基礎素體進行深度特化，以下為核心模組解析：</p>
+                <div class="space-y-6 md:space-y-8">
+                    <p class="text-base md:text-lg text-mecha-text leading-relaxed">本機體以 <strong>bEXM-33QB 沃爾帕諾瓦 (Volpanova)</strong> 為基礎素體進行深度特化。點擊下方模組板塊可進入全息檢視模式：</p>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-mecha-surface border border-[#434b3c] rounded-lg overflow-hidden group hover:border-mecha-sensor transition-colors shadow-md relative">
-                            <div class="h-56 bg-mecha-tire flex items-center justify-center relative overflow-hidden hud-viewfinder p-2">
-                                <div class="absolute top-2 right-3 text-[10px] font-mono text-mecha-sensor opacity-70 z-20">REC_OPT.01</div>
-                                <img src="./images/body.jpg" alt="沃爾帕諾瓦本體" class="w-full h-full object-cover filter brightness-90 group-hover:brightness-110 transition-all duration-300 relative z-10">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
+                        
+                        <div class="clickable-module cursor-pointer bg-mecha-surface border border-[#434b3c] rounded-lg overflow-hidden group hover:border-mecha-sensor transition-all shadow-md hover:shadow-[0_0_15px_rgba(14,219,173,0.2)] transform hover:-translate-y-1"
+                             data-img="./images/body.jpg" 
+                             data-title="素體架構" 
+                             data-desc="保留 bEXM-33QB 沃爾帕諾瓦的高乘載特性。<br><br>我們強化了下盤關節以應對重型火砲開火時產生的強大後座力。深沙綠色的塗裝提供了良好的戰場隱蔽性。">
+                            <!-- HUD 修復：文字移入內部，避免與框線重疊 -->
+                            <div class="h-48 md:h-56 bg-mecha-tire flex items-center justify-center relative overflow-hidden p-4 hud-viewfinder">
+                                <div class="absolute top-4 right-5 text-[10px] md:text-xs font-mono text-mecha-sensor opacity-70 z-20 bg-black/50 px-1.5 rounded">REC_OPT.01</div>
+                                <img src="./images/body.jpg" alt="沃爾帕諾瓦本體" class="w-full h-full object-cover filter brightness-90 group-hover:brightness-110 transition-all duration-300 relative z-10 rounded-sm">
                                 <div class="absolute inset-0 bg-mecha-sensor opacity-0 group-hover:opacity-10 transition-opacity z-20 mix-blend-color"></div>
+                                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 z-30 transition-opacity">
+                                    <span class="bg-black/70 text-mecha-sensor px-3 py-1 rounded font-mono text-sm border border-mecha-sensor backdrop-blur-sm shadow-[0_0_10px_#0edbad]">ACCESS_DATA</span>
+                                </div>
                             </div>
-                            <div class="p-5 border-t border-[#434b3c]">
-                                <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2"><span class="w-1.5 h-1.5 bg-mecha-accent rounded-full"></span> 素體架構</h3>
-                                <p class="text-sm text-mecha-muted">保留 bEXM-33QB 的高乘載特性，強化下盤關節以應對重型火砲的後座力。</p>
+                            <div class="p-4 md:p-5 border-t border-[#434b3c] bg-gradient-to-b from-transparent to-black/10">
+                                <h3 class="text-base md:text-lg font-bold text-white mb-2 flex items-center gap-2 group-hover:text-mecha-sensor transition-colors"><span class="w-1.5 h-1.5 bg-mecha-accent rounded-full group-hover:bg-mecha-sensor"></span> 素體架構</h3>
+                                <p class="text-xs md:text-sm text-mecha-muted line-clamp-2">保留 bEXM-33QB 的高乘載特性，強化下盤關節以應對重型火砲的後座力。</p>
                             </div>
                         </div>
 
-                        <div class="bg-mecha-surface border border-[#434b3c] rounded-lg overflow-hidden group hover:border-mecha-sensor transition-colors shadow-md relative">
-                            <div class="h-56 bg-mecha-tire flex items-center justify-center relative overflow-hidden hud-viewfinder p-2">
-                                <div class="absolute top-2 right-3 text-[10px] font-mono text-mecha-sensor opacity-70 z-20">REC_OPT.02</div>
-                                <span class="text-mecha-muted/80 font-mono text-sm tracking-widest animate-pulse">[ NO SIGNAL ]</span>
+                        <div class="clickable-module cursor-pointer bg-mecha-surface border border-[#434b3c] rounded-lg overflow-hidden group hover:border-mecha-sensor transition-all shadow-md hover:shadow-[0_0_15px_rgba(14,219,173,0.2)] transform hover:-translate-y-1"
+                             data-img="" 
+                             data-title="主武裝：背部大型加農砲" 
+                             data-desc="提供超視距打擊能力，為機體「專一重火力」理念的核心體現。<br><br><strong class='text-mecha-sensor'>>> WARNING: </strong>開火時請確保機體處於穩定立姿或展開駐鋤。">
+                            <div class="h-48 md:h-56 bg-mecha-tire flex items-center justify-center relative overflow-hidden p-4 hud-viewfinder">
+                                <div class="absolute top-4 right-5 text-[10px] md:text-xs font-mono text-mecha-sensor opacity-70 z-20 bg-black/50 px-1.5 rounded">REC_OPT.02</div>
+                                <div class="relative z-10 flex flex-col items-center">
+                                    <i data-lucide="image-off" class="w-8 h-8 text-[#434b3c] mb-2 opacity-50"></i>
+                                    <span class="text-mecha-muted/80 font-mono text-sm tracking-widest animate-pulse">[ NO SIGNAL ]</span>
+                                </div>
                                 <div class="absolute inset-0 bg-mecha-sensor opacity-0 group-hover:opacity-10 transition-opacity z-20 mix-blend-color"></div>
+                                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 z-30 transition-opacity">
+                                    <span class="bg-black/70 text-mecha-sensor px-3 py-1 rounded font-mono text-sm border border-mecha-sensor backdrop-blur-sm shadow-[0_0_10px_#0edbad]">ACCESS_DATA</span>
+                                </div>
                             </div>
-                            <div class="p-5 border-t border-[#434b3c]">
-                                <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2"><span class="w-1.5 h-1.5 bg-mecha-accent rounded-full"></span> 主武裝：背部大型加農砲</h3>
-                                <p class="text-sm text-mecha-muted">提供超視距打擊能力，為機體「專一重火力」理念的核心體現。</p>
+                            <div class="p-4 md:p-5 border-t border-[#434b3c] bg-gradient-to-b from-transparent to-black/10">
+                                <h3 class="text-base md:text-lg font-bold text-white mb-2 flex items-center gap-2 group-hover:text-mecha-sensor transition-colors"><span class="w-1.5 h-1.5 bg-mecha-accent rounded-full group-hover:bg-mecha-sensor"></span> 背部大型加農砲</h3>
+                                <p class="text-xs md:text-sm text-mecha-muted line-clamp-2">提供超視距打擊能力，為機體「專一重火力」理念的核心體現。</p>
                             </div>
                         </div>
                         
-                        <div class="bg-mecha-surface border border-[#434b3c] rounded-lg overflow-hidden group hover:border-mecha-sensor transition-colors md:col-span-2 shadow-md">
-                            <div class="p-5 md:flex gap-6 items-center">
-                                <div class="w-full md:w-2/5 h-48 bg-mecha-tire flex items-center justify-center mb-4 md:mb-0 relative hud-viewfinder">
-                                    <div class="absolute top-2 right-3 text-[10px] font-mono text-mecha-sensor opacity-70 z-20">REC_OPT.03</div>
-                                     <span class="text-mecha-muted/80 font-mono text-sm tracking-widest animate-pulse">[ NO SIGNAL ]</span>
+                        <div class="clickable-module cursor-pointer bg-mecha-surface border border-[#434b3c] rounded-lg overflow-hidden group hover:border-mecha-sensor transition-all md:col-span-2 shadow-md hover:shadow-[0_0_15px_rgba(14,219,173,0.2)] transform hover:-translate-y-1 flex flex-col md:flex-row"
+                             data-img="" 
+                             data-title="戰術副腕 (外掛式白色大手臂)" 
+                             data-desc="為了在搭載重型火砲的同時維持近戰防禦與基礎作業能力，特別導入了外掛式副腕。<br><br><strong class='text-mecha-sensor bg-mecha-tire px-2 py-1 rounded border border-[#434b3c]'>DESIGN_LOGIC</strong><br>此副腕的關節配置經過精確計算，絕不干涉原本主手臂的靈活度與可動範圍，完美實現「擴充但不累贅」的工程美學。">
+                            
+                            <div class="w-full md:w-2/5 h-48 md:h-auto bg-mecha-tire flex items-center justify-center relative p-4 hud-viewfinder shrink-0">
+                                <div class="absolute top-4 right-5 text-[10px] md:text-xs font-mono text-mecha-sensor opacity-70 z-20 bg-black/50 px-1.5 rounded">REC_OPT.03</div>
+                                 <div class="relative z-10 flex flex-col items-center">
+                                    <i data-lucide="image-off" class="w-8 h-8 text-[#434b3c] mb-2 opacity-50"></i>
+                                    <span class="text-mecha-muted/80 font-mono text-sm tracking-widest animate-pulse">[ NO SIGNAL ]</span>
                                 </div>
-                                <div class="w-full md:w-3/5">
-                                    <h3 class="text-lg font-bold text-white mb-2 flex items-center gap-2"><span class="w-1.5 h-1.5 bg-mecha-accent rounded-full"></span> 戰術副腕 (外掛式白色大手臂)</h3>
-                                    <p class="text-sm text-mecha-muted leading-relaxed">
-                                        為了在搭載重型火砲的同時維持近戰防禦與基礎作業能力，特別導入了外掛式副腕。<br><br>
-                                        <strong class="text-mecha-sensor font-mono text-xs border border-mecha-sensor px-1 rounded mr-1">DESIGN LOGIC</strong>
-                                        此副腕的關節配置經過精確計算，絕不干涉原本主手臂的靈活度與可動範圍，完美實現「擴充但不累贅」的工程美學。
-                                    </p>
+                                <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 z-30 transition-opacity">
+                                    <span class="bg-black/70 text-mecha-sensor px-3 py-1 rounded font-mono text-sm border border-mecha-sensor backdrop-blur-sm shadow-[0_0_10px_#0edbad]">ACCESS_DATA</span>
                                 </div>
+                            </div>
+                            
+                            <div class="w-full md:w-3/5 p-4 md:p-6 border-t md:border-t-0 md:border-l border-[#434b3c] flex flex-col justify-center bg-gradient-to-r from-transparent to-black/10">
+                                <h3 class="text-base md:text-lg font-bold text-white mb-3 flex items-center gap-2 group-hover:text-mecha-sensor transition-colors"><span class="w-1.5 h-1.5 bg-mecha-accent rounded-full group-hover:bg-mecha-sensor"></span> 戰術副腕 (白色大手臂)</h3>
+                                <p class="text-xs md:text-sm text-mecha-muted leading-relaxed">
+                                    為了在搭載重型火砲的同時維持近戰防禦與基礎作業能力，特別導入了外掛式副腕。<br><br>
+                                    <strong class="text-mecha-sensor font-mono text-[10px] md:text-xs border border-mecha-sensor px-1 rounded mr-1">DESIGN LOGIC</strong>
+                                    此副腕的關節配置經過精確計算，絕不干涉主手臂可動範圍。
+                                </p>
                             </div>
                         </div>
                     </div>
                 </div>
-                <!-- 戰術切換按鈕 -->
                 <div class="mt-12 flex justify-end border-t border-[#434b3c] pt-6">
                     <button class="next-phase-btn group relative px-6 py-3 bg-mecha-tire border-2 border-[#434b3c] hover:border-mecha-sensor overflow-hidden transition-all shadow-md" data-target="chapter-4">
                         <div class="absolute inset-0 bg-caution-stripes opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <div class="relative flex items-center gap-2 text-mecha-muted group-hover:text-mecha-sensor font-mono font-bold tracking-widest transition-colors">
+                        <div class="relative flex items-center gap-2 text-mecha-muted group-hover:text-mecha-sensor font-mono font-bold tracking-widest transition-colors text-sm md:text-base">
                             <span>NEXT_PHASE</span>
                             <i data-lucide="chevrons-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
                         </div>
@@ -339,57 +307,85 @@
                 </div>
             </section>
 
-            <!-- 章節四 -->
+            <!-- 章節四：變形結構 (3變形擴充版) -->
             <section id="chapter-4" class="content-section">
                 <div class="mb-8 border-l-4 border-mecha-accent pl-4">
-                    <h2 class="text-3xl font-bold text-white mb-2 tracking-wide">變形機構展示</h2>
-                    <p class="text-mecha-accent font-mono text-xs tracking-widest">CHAPTER 04 // TRANSFORMATION MECHANISM</p>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mb-2 tracking-wide">變形機構展示</h2>
+                    <p class="text-mecha-accent font-mono text-xs md:text-sm tracking-widest">CHAPTER 04 // TRANSFORMATION MECHANISM</p>
                 </div>
                 <div class="space-y-6 text-mecha-text">
-                    <p class="text-lg leading-relaxed">機甲的浪漫在於結構的轉換。本專案保留並強化了沃爾帕諾瓦特有的變形系統，實現了戰術上的無縫切換。</p>
+                    <p class="text-base md:text-lg leading-relaxed">機甲的浪漫在於結構的轉換。本專案保留並強化了沃爾帕諾瓦特有的變形系統，並成功開發出第三種特殊戰術型態。點擊面板檢視詳細規格：</p>
                     
-                    <div class="relative pl-8 md:pl-0 mt-8">
-                        <div class="md:hidden absolute left-3 top-0 bottom-0 w-0.5 bg-[#434b3c]"></div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
-                            <div class="bg-mecha-surface p-6 rounded-lg border border-[#434b3c] relative shadow-md group hover:border-mecha-accent transition-colors">
-                                <div class="md:hidden absolute left-[-25px] top-6 w-3 h-3 bg-mecha-accent rounded-full shadow-[0_0_10px_#9ca986]"></div>
-                                <h3 class="text-xl font-bold text-white mb-4 flex items-center justify-between">
-                                    <span class="font-mono text-mecha-accent">Form_01 : <span class="text-white font-sans">雙足重裝型態</span></span>
-                                    <i data-lucide="person-standing" class="text-[#c2ccb6]"></i>
-                                </h3>
-                                <div class="h-48 bg-mecha-tire rounded flex items-center justify-center mb-4 hud-viewfinder">
-                                     <span class="text-mecha-muted/80 font-mono text-sm tracking-widest animate-pulse">[ NO SIGNAL ]</span>
-                                </div>
-                                <p class="text-sm text-mecha-muted border-l-2 border-[#545e4b] pl-3">適用於複雜地形的推進與陣地防衛，雙足提供穩定的射擊基座。</p>
-                            </div>
-
-                            <div class="hidden md:flex absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 flex-col items-center gap-1">
-                                <span class="text-[10px] font-mono text-mecha-sensor">TRANSFORM</span>
-                                <div class="w-12 h-12 bg-mecha-tire rounded-full border border-mecha-sensor items-center justify-center flex shadow-[0_0_15px_rgba(14,219,173,0.3)]">
-                                    <i data-lucide="chevrons-right" class="text-mecha-sensor w-6 h-6 animate-pulse"></i>
+                    <!-- 3變形排版：桌機橫列，手機直列 -->
+                    <div class="flex flex-col lg:flex-row items-center lg:items-stretch justify-center gap-4 mt-8">
+                        
+                        <!-- Form 01 -->
+                        <div class="clickable-module w-full lg:flex-1 bg-mecha-surface p-4 rounded-lg border border-[#434b3c] relative shadow-md group hover:border-mecha-accent transition-all cursor-pointer hover:shadow-[0_0_15px_rgba(156,169,134,0.3)] hover:-translate-y-1"
+                             data-img="" data-title="Form_01 : 雙足重裝型態" data-desc="展開雙足後，機體能獲得最佳的接地面積，為背部大型加農砲提供極其穩定的射擊基座。">
+                            <h3 class="text-base md:text-lg font-bold text-white mb-3 flex items-center justify-between group-hover:text-mecha-accent transition-colors">
+                                <span class="font-mono">Form_01</span>
+                                <i data-lucide="person-standing" class="text-[#c2ccb6] w-5 h-5"></i>
+                            </h3>
+                            <div class="h-40 bg-mecha-tire rounded flex items-center justify-center mb-4 hud-viewfinder p-2 overflow-hidden">
+                                 <div class="relative z-10 flex flex-col items-center">
+                                    <span class="text-mecha-muted/80 font-mono text-xs tracking-widest animate-pulse">[ NO SIGNAL ]</span>
                                 </div>
                             </div>
+                            <p class="text-xs text-mecha-muted border-l-2 border-[#545e4b] pl-2 line-clamp-2">適用於複雜地形推進，提供穩定的射擊基座。</p>
+                        </div>
 
-                            <div class="bg-mecha-surface p-6 rounded-lg border border-[#434b3c] relative shadow-md group hover:border-mecha-accent transition-colors">
-                                <div class="md:hidden absolute left-[-25px] top-6 w-3 h-3 bg-[#545e4b] rounded-full"></div>
-                                <h3 class="text-xl font-bold text-white mb-4 flex items-center justify-between">
-                                    <span class="font-mono text-mecha-accent">Form_02 : <span class="text-white font-sans">四輪移動砲塔</span></span>
-                                    <i data-lucide="car" class="text-[#c2ccb6]"></i>
-                                </h3>
-                                <div class="h-48 bg-mecha-tire rounded flex items-center justify-center mb-4 hud-viewfinder">
-                                     <span class="text-mecha-muted/80 font-mono text-sm tracking-widest animate-pulse">[ NO SIGNAL ]</span>
-                                </div>
-                                <p class="text-sm text-mecha-muted border-l-2 border-[#545e4b] pl-3">收納雙足，展開四輪結構。大幅提升平原地形的機動力，可執行快速部署與一擊脫離戰術。</p>
+                        <!-- 箭頭 1 -->
+                        <div class="flex flex-col items-center justify-center py-2 lg:py-0 shrink-0 relative">
+                            <div class="w-10 h-10 bg-mecha-tire rounded-full border-2 border-[#434b3c] flex items-center justify-center">
+                                <i data-lucide="chevrons-right" class="hidden lg:block text-mecha-sensor w-6 h-6 animate-pulse"></i>
+                                <i data-lucide="chevrons-down" class="block lg:hidden text-mecha-sensor w-6 h-6 animate-pulse"></i>
                             </div>
                         </div>
+
+                        <!-- Form 02 -->
+                        <div class="clickable-module w-full lg:flex-1 bg-mecha-surface p-4 rounded-lg border border-[#434b3c] relative shadow-md group hover:border-mecha-accent transition-all cursor-pointer hover:shadow-[0_0_15px_rgba(156,169,134,0.3)] hover:-translate-y-1"
+                             data-img="" data-title="Form_02 : 四輪移動砲塔" data-desc="大幅提升平原地形的機動力。<br><br>將雙足結構收納折疊，並展開隱藏的四個重型輪胎，機體便能執行快速部署與一擊脫離 (Hit-and-Run) 戰術。">
+                            <h3 class="text-base md:text-lg font-bold text-white mb-3 flex items-center justify-between group-hover:text-mecha-accent transition-colors">
+                                <span class="font-mono">Form_02</span>
+                                <i data-lucide="car" class="text-[#c2ccb6] w-5 h-5"></i>
+                            </h3>
+                            <div class="h-40 bg-mecha-tire rounded flex items-center justify-center mb-4 hud-viewfinder p-2 overflow-hidden">
+                                 <div class="relative z-10 flex flex-col items-center">
+                                    <span class="text-mecha-muted/80 font-mono text-xs tracking-widest animate-pulse">[ NO SIGNAL ]</span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-mecha-muted border-l-2 border-[#545e4b] pl-2 line-clamp-2">展開四輪結構，大幅提升機動力，適合快速部署。</p>
+                        </div>
+
+                        <!-- 箭頭 2 -->
+                        <div class="flex flex-col items-center justify-center py-2 lg:py-0 shrink-0 relative">
+                            <div class="w-10 h-10 bg-mecha-tire rounded-full border-2 border-[#434b3c] flex items-center justify-center">
+                                <i data-lucide="chevrons-right" class="hidden lg:block text-mecha-sensor w-6 h-6 animate-pulse"></i>
+                                <i data-lucide="chevrons-down" class="block lg:hidden text-mecha-sensor w-6 h-6 animate-pulse"></i>
+                            </div>
+                        </div>
+
+                        <!-- Form 03 (新增) -->
+                        <div class="clickable-module w-full lg:flex-1 bg-mecha-surface p-4 rounded-lg border border-[#434b3c] relative shadow-md group hover:border-mecha-accent transition-all cursor-pointer hover:shadow-[0_0_15px_rgba(156,169,134,0.3)] hover:-translate-y-1"
+                             data-img="" data-title="Form_03 : 懸浮突擊型態" data-desc="完全捨棄防禦力的終極機動模式。<br><br>透過改變懸吊系統角度並啟動隱藏姿態推進器，讓機體能在水面或惡劣地貌上進行短暫的高速滑行與突擊。">
+                            <h3 class="text-base md:text-lg font-bold text-white mb-3 flex items-center justify-between group-hover:text-mecha-accent transition-colors">
+                                <span class="font-mono">Form_03</span>
+                                <i data-lucide="wind" class="text-[#c2ccb6] w-5 h-5"></i>
+                            </h3>
+                            <div class="h-40 bg-mecha-tire rounded flex items-center justify-center mb-4 hud-viewfinder p-2 overflow-hidden">
+                                 <div class="relative z-10 flex flex-col items-center">
+                                    <span class="text-mecha-muted/80 font-mono text-xs tracking-widest animate-pulse">[ NO SIGNAL ]</span>
+                                </div>
+                            </div>
+                            <p class="text-xs text-mecha-muted border-l-2 border-[#545e4b] pl-2 line-clamp-2">啟動姿態推進器，實行全域地形的高速滑行與突擊。</p>
+                        </div>
+
                     </div>
                 </div>
-                <!-- 戰術切換按鈕 -->
                 <div class="mt-12 flex justify-end border-t border-[#434b3c] pt-6">
                     <button class="next-phase-btn group relative px-6 py-3 bg-mecha-tire border-2 border-[#434b3c] hover:border-mecha-sensor overflow-hidden transition-all shadow-md" data-target="chapter-5">
                         <div class="absolute inset-0 bg-caution-stripes opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <div class="relative flex items-center gap-2 text-mecha-muted group-hover:text-mecha-sensor font-mono font-bold tracking-widest transition-colors">
+                        <div class="relative flex items-center gap-2 text-mecha-muted group-hover:text-mecha-sensor font-mono font-bold tracking-widest transition-colors text-sm md:text-base">
                             <span>NEXT_PHASE</span>
                             <i data-lucide="chevrons-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
                         </div>
@@ -400,47 +396,44 @@
             <!-- 章節五 -->
             <section id="chapter-5" class="content-section">
                 <div class="mb-8 border-l-4 border-mecha-accent pl-4">
-                    <h2 class="text-3xl font-bold text-white mb-2 tracking-wide">AI 協同開發紀錄</h2>
-                    <p class="text-mecha-accent font-mono text-xs tracking-widest">CHAPTER 05 // AI COLLABORATION & VYGOTSKY</p>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mb-2 tracking-wide">AI 協同開發紀錄</h2>
+                    <p class="text-mecha-accent font-mono text-xs md:text-sm tracking-widest">CHAPTER 05 // AI COLLABORATION & VYGOTSKY</p>
                 </div>
                 <div class="space-y-6 text-mecha-text">
-                    <p class="text-lg">在硬體開發過程中，當我面臨「擴充零件選擇」與「輪胎變形卡頓」的物理干涉瓶頸時，我將 AI 引入了除錯流程。這段過程完美印證了教育心理學中的理論。</p>
+                    <p class="text-base md:text-lg">在硬體開發過程中，當我面臨「擴充零件選擇」與「輪胎變形卡頓」的物理干涉瓶頸時，我將 AI 引入了除錯流程。這段過程完美印證了教育心理學中的理論。</p>
                     
                     <div class="bg-mecha-tire rounded-lg p-1 shadow-inner border border-[#434b3c]">
-                        <div class="bg-mecha-surface border-l-4 border-mecha-sensor p-5 rounded-r-lg relative overflow-hidden">
+                        <div class="bg-mecha-surface border-l-4 border-mecha-sensor p-4 md:p-6 rounded-r-lg relative overflow-hidden">
                             <i data-lucide="brain-circuit" class="absolute -right-4 -bottom-4 w-32 h-32 text-[#434b3c] opacity-30"></i>
                             
-                            <h3 class="text-xl font-bold text-white mb-3 flex items-center gap-2 relative z-10">
-                                <i data-lucide="lightbulb" class="text-mecha-sensor"></i> 維高斯基 (Vygotsky)：「鷹架理論」與「近側發展區間」
+                            <h3 class="text-lg md:text-xl font-bold text-white mb-4 flex items-center gap-2 relative z-10">
+                                <i data-lucide="lightbulb" class="text-mecha-sensor"></i> 維高斯基 (Vygotsky)：「鷹架理論」
                             </h3>
                             
-                            <!-- 增強對比與亮度的理論文字區塊 -->
-                            <div class="bg-black/30 p-4 rounded-md border-l-2 border-mecha-accent mb-6 relative z-10 shadow-sm">
-                                <p class="text-[15px] text-white/90 font-medium leading-relaxed tracking-wide">
-                                    在這個專案中，我本身的組裝經驗是我的「實際發展水平」。而我想達到的完美變形結構，則位於我的「潛在發展水平」。這兩者之間的差距，就是我的 <strong class="text-mecha-sensor">近側發展區間 (ZPD)</strong>。
+                            <div class="bg-black/40 p-4 md:p-5 rounded-md border-l-2 border-mecha-accent mb-6 relative z-10 shadow-sm backdrop-blur-sm">
+                                <p class="text-base md:text-[17px] text-white font-medium leading-relaxed tracking-wide drop-shadow-md">
+                                    在這個專案中，我本身的組裝經驗是我的「實際發展水平」。而我想達到的完美變形結構，則位於我的「潛在發展水平」。這兩者之間的差距，就是我的 <strong class="text-mecha-sensor border-b border-mecha-sensor pb-0.5">近側發展區間 (ZPD)</strong>。
                                 </p>
                             </div>
                             
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 relative z-10">
-                                <!-- 強化的報錯紅框區塊 -->
-                                <div class="bg-mecha-dark p-5 rounded border-2 border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.25)]">
-                                    <h4 class="text-red-400 font-mono font-bold mb-2 flex items-center gap-2 text-sm"><i data-lucide="alert-triangle" class="w-4 h-4"></i> ERR_干涉發生</h4>
-                                    <p class="text-sm text-mecha-text">變形為四輪型態時，背部加農砲的基座會與後輪產生干涉，導致輪胎無法順暢貼地，失去機動性。</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 mt-4 relative z-10">
+                                <div class="bg-mecha-dark p-4 md:p-5 rounded border-2 border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.3)]">
+                                    <h4 class="text-red-400 font-mono font-bold mb-3 flex items-center gap-2 text-sm md:text-base"><i data-lucide="alert-triangle" class="w-4 h-4 md:w-5 md:h-5"></i> ERR_干涉發生</h4>
+                                    <p class="text-xs md:text-sm text-white/90 leading-relaxed">變形為四輪型態時，背部加農砲的基座會與後輪產生干涉，導致輪胎無法順暢貼地，失去機動性。</p>
                                 </div>
                                 
-                                <div class="bg-mecha-dark p-5 rounded border border-mecha-sensor shadow-inner">
-                                    <h4 class="text-mecha-sensor font-mono font-bold mb-2 flex items-center gap-2 text-sm"><i data-lucide="cpu" class="w-4 h-4"></i> MKO_介入 (鷹架提供)</h4>
-                                    <p class="text-sm text-mecha-text">AI 作為「更有能力者 (MKO)」，並未直接給定單一解答，而是提供「延長關節臂」、「改變球型關節角度」等除錯方向。透過這些引導，我最終自行找到了利用擴充包 C 型扣環增加活動餘裕的最佳解。</p>
+                                <div class="bg-mecha-dark p-4 md:p-5 rounded border border-mecha-sensor shadow-inner">
+                                    <h4 class="text-mecha-sensor font-mono font-bold mb-3 flex items-center gap-2 text-sm md:text-base"><i data-lucide="cpu" class="w-4 h-4 md:w-5 md:h-5"></i> MKO_介入 (鷹架提供)</h4>
+                                    <p class="text-xs md:text-sm text-white/80 leading-relaxed">AI 作為「更有能力者 (MKO)」，並未直接給定單一解答，而是提供「延長關節臂」、「改變球型關節角度」等方向。透過引導，我找到了利用 C 型扣環增加活動餘裕的最佳解。</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <!-- 戰術切換按鈕 -->
                 <div class="mt-12 flex justify-end border-t border-[#434b3c] pt-6">
                     <button class="next-phase-btn group relative px-6 py-3 bg-mecha-tire border-2 border-[#434b3c] hover:border-mecha-sensor overflow-hidden transition-all shadow-md" data-target="chapter-6">
                         <div class="absolute inset-0 bg-caution-stripes opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <div class="relative flex items-center gap-2 text-mecha-muted group-hover:text-mecha-sensor font-mono font-bold tracking-widest transition-colors">
+                        <div class="relative flex items-center gap-2 text-mecha-muted group-hover:text-mecha-sensor font-mono font-bold tracking-widest transition-colors text-sm md:text-base">
                             <span>NEXT_PHASE</span>
                             <i data-lucide="chevrons-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
                         </div>
@@ -451,33 +444,32 @@
             <!-- 章節六 -->
             <section id="chapter-6" class="content-section">
                 <div class="mb-8 border-l-4 border-mecha-accent pl-4">
-                    <h2 class="text-3xl font-bold text-white mb-2 tracking-wide">學理剖析總結</h2>
-                    <p class="text-mecha-accent font-mono text-xs tracking-widest">CHAPTER 06 // PSYCHOLOGICAL ANALYSIS & CONCLUSION</p>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white mb-2 tracking-wide">學理剖析總結</h2>
+                    <p class="text-mecha-accent font-mono text-xs md:text-sm tracking-widest">CHAPTER 06 // PSYCHOLOGICAL ANALYSIS & CONCLUSION</p>
                 </div>
                 <div class="space-y-6 text-mecha-text leading-relaxed">
-                    <p class="text-lg">將硬核的模型改裝與《愛的饗宴》這門課程結合，看似跳脫，實則在學習歷程上高度重疊。本次專案不僅是實體模型的構築，更是個人認知結構的重塑。</p>
+                    <p class="text-base md:text-lg">將硬核的模型改裝與《愛的饗宴》這門課程結合，看似跳脫，實則在學習歷程上高度重疊。本次專案不僅是實體模型的構築，更是個人認知結構的重塑。</p>
                     
-                    <div class="space-y-8 mt-8">
-                        <div class="flex flex-col md:flex-row gap-6 items-start border-b border-[#434b3c] pb-8 relative">
+                    <div class="space-y-6 md:space-y-8 mt-6 md:mt-8">
+                        <div class="flex flex-col md:flex-row gap-4 md:gap-6 items-start border-b border-[#434b3c] pb-6 md:pb-8 relative">
                             <div class="absolute left-[23px] top-12 bottom-0 w-[2px] bg-[#434b3c] hidden md:block"></div>
-                            <div class="w-12 h-12 rounded-full bg-mecha-tire border border-[#545e4b] flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(0,0,0,0.5)] z-10 relative">
-                                <i data-lucide="network" class="text-[#c2ccb6]"></i>
-                                <span class="absolute top-0 right-0 w-2 h-2 bg-[#c2ccb6] rounded-full"></span>
+                            <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-mecha-tire border border-[#545e4b] flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(0,0,0,0.5)] z-10 relative">
+                                <i data-lucide="network" class="text-[#c2ccb6] w-5 h-5 md:w-6 md:h-6"></i>
                             </div>
-                            <div class="bg-mecha-surface p-5 rounded-lg border border-[#434b3c] flex-1">
-                                <h3 class="text-xl font-bold text-white mb-2">皮亞傑 (Piaget) 的「同化與調適」</h3>
+                            <div class="bg-mecha-surface p-4 md:p-5 rounded-lg border border-[#434b3c] flex-1 w-full">
+                                <h3 class="text-lg md:text-xl font-bold text-white mb-2">皮亞傑 (Piaget) 的「同化與調適」</h3>
                                 <p class="text-mecha-muted text-sm leading-relaxed">
                                     在初期設計時，我試圖將過去組裝鋼彈模型的經驗直接套用在 30MM 系統上（<strong>同化 Assimilation</strong>）。然而，30MM 的 3mm 共通孔洞系統具有截然不同的擴充邏輯，舊經驗導致了結構不穩。為了解決這個認知失衡，我必須改變舊有的思維框架，重新理解並適應 30MM 的模組化特性（<strong>調適 Accommodation</strong>），最終達到了新的認知平衡。
                                 </p>
                             </div>
                         </div>
 
-                        <div class="flex flex-col md:flex-row gap-6 items-start relative">
-                            <div class="w-12 h-12 rounded-full bg-mecha-tire border border-mecha-accent flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(156,169,134,0.3)] z-10">
-                                <i data-lucide="flame" class="text-mecha-accent"></i>
+                        <div class="flex flex-col md:flex-row gap-4 md:gap-6 items-start relative">
+                            <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-mecha-tire border border-mecha-accent flex items-center justify-center shrink-0 shadow-[0_0_10px_rgba(156,169,134,0.3)] z-10">
+                                <i data-lucide="flame" class="text-mecha-accent w-5 h-5 md:w-6 md:h-6"></i>
                             </div>
-                            <div class="bg-mecha-surface p-5 rounded-lg border border-[#434b3c] flex-1">
-                                <h3 class="text-xl font-bold text-white mb-2">內在動機與《愛的饗宴》的啟發</h3>
+                            <div class="bg-mecha-surface p-4 md:p-5 rounded-lg border border-[#434b3c] flex-1 w-full">
+                                <h3 class="text-lg md:text-xl font-bold text-white mb-2">內在動機與《愛的饗宴》的啟發</h3>
                                 <p class="text-mecha-muted text-sm leading-relaxed">
                                     《愛的饗宴》課程中探討了驅動人類行為的深層動機。本次「專一機甲」的開發，完全源自於對組裝工藝的熱愛與對完美結構的追求，這是一種強烈的<strong class="text-[#c2ccb6]">內在學習動機</strong>。當我們處於這種心流狀態時，面對「輪胎卡頓」或「武裝干涉」的挫折，不再是打擊，而是解謎的樂趣。這學期的課程讓我深刻體會到，無論是教育還是自我學習，找到並點燃那份「愛」與「熱情」，才是最持久的動力來源。
                                 </p>
@@ -485,12 +477,11 @@
                         </div>
                     </div>
                 </div>
-                <!-- 回歸初始按鈕 (彩蛋) -->
                 <div class="mt-12 flex justify-end border-t border-[#434b3c] pt-6">
                     <button class="next-phase-btn group relative px-6 py-3 bg-mecha-tire border-2 border-[#434b3c] hover:border-mecha-sensor overflow-hidden transition-all shadow-md" data-target="chapter-1">
                         <div class="absolute inset-0 bg-caution-stripes opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <div class="relative flex items-center gap-2 text-mecha-muted group-hover:text-mecha-sensor font-mono font-bold tracking-widest transition-colors">
-                            <i data-lucide="refresh-cw" class="w-5 h-5 group-hover:-rotate-180 transition-transform duration-500"></i>
+                        <div class="relative flex items-center gap-2 text-mecha-muted group-hover:text-mecha-sensor font-mono font-bold tracking-widest transition-colors text-sm md:text-base">
+                            <i data-lucide="refresh-cw" class="w-4 h-4 md:w-5 md:h-5 group-hover:-rotate-180 transition-transform duration-500"></i>
                             <span>SYS_REBOOT</span>
                         </div>
                     </button>
@@ -500,22 +491,63 @@
         </div>
     </main>
 
-    <!-- JavaScript：處理選單切換與無縫過場動畫 -->
+    <!-- 全息圖鑑 Modal (Lightbox) 修復按鈕遮擋版 -->
+    <div id="lightbox-modal" class="fixed inset-0 z-[100] bg-black/90 hidden flex-col items-center justify-center p-4 md:p-12 opacity-0 transition-opacity duration-300 backdrop-blur-sm">
+        <div class="max-w-5xl w-full h-auto max-h-[90vh] flex flex-col md:flex-row gap-0 bg-mecha-surface border border-mecha-sensor rounded-lg overflow-y-auto md:overflow-hidden relative shadow-[0_0_40px_rgba(14,219,173,0.3)]" id="lightbox-content">
+            
+            <!-- 圖片展示區 -->
+            <div class="w-full md:w-3/5 bg-mecha-tire relative min-h-[250px] md:min-h-[500px] flex items-center justify-center p-6 border-b md:border-b-0 md:border-r border-[#434b3c]">
+                <div class="absolute inset-0 scanlines mix-blend-overlay"></div>
+                <div class="absolute top-4 left-4 text-xs font-mono text-mecha-sensor opacity-50 z-10">[ IMG_ANALYSIS_ACTIVE ]</div>
+                
+                <img id="lightbox-img" src="" alt="模組詳情" class="w-full h-full object-contain max-h-[40vh] md:max-h-[70vh] relative z-20 drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]">
+                
+                <!-- 無圖片備用畫面 -->
+                <div id="lightbox-no-signal" class="hidden flex-col items-center text-[#434b3c] relative z-20">
+                    <i data-lucide="image-off" class="w-16 h-16 mb-4 opacity-50"></i>
+                    <span class="font-mono text-lg tracking-widest animate-pulse">[ NO SIGNAL ]</span>
+                </div>
+            </div>
+
+            <!-- 文字解析區 (按鈕移至此處右下角) -->
+            <div class="w-full md:w-2/5 p-6 md:p-8 flex flex-col justify-start md:justify-center bg-gradient-to-br from-transparent to-black/20 relative pb-24 md:pb-8">
+                <h3 class="text-2xl md:text-3xl font-bold text-white mb-4 md:mb-6 flex items-start md:items-center gap-3 border-b border-[#434b3c] pb-4">
+                   <span class="w-2.5 h-2.5 bg-mecha-sensor rounded-full animate-pulse mt-2 md:mt-0 shrink-0 shadow-[0_0_8px_#0edbad]"></span> 
+                   <span id="lightbox-title-text" class="leading-tight">Title</span>
+                </h3>
+                <p id="lightbox-desc" class="text-mecha-muted text-base md:text-lg leading-relaxed md:leading-loose">Description...</p>
+                
+                <div class="mt-8 pt-4 border-t border-[#434b3c] flex items-center gap-2 text-mecha-sensor/50 font-mono text-xs">
+                    <i data-lucide="info" class="w-4 h-4"></i> <span>CLASSIFIED INFORMATION</span>
+                </div>
+
+                <!-- 戰術返回按鈕 (固定在文字區塊右下角，絕對不會擋到字) -->
+                <button id="lightbox-close" class="absolute bottom-6 right-6 z-50 bg-mecha-tire border-2 border-mecha-sensor text-mecha-sensor hover:bg-mecha-sensor hover:text-mecha-dark px-4 py-2 rounded font-mono text-sm tracking-widest transition-colors flex items-center gap-2 shadow-[0_0_15px_rgba(14,219,173,0.3)]">
+                    <i data-lucide="corner-down-left" class="w-4 h-4"></i> <span>RETURN</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript 邏輯 -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
 
             const navLinks = document.querySelectorAll('.nav-link');
             const nextBtns = document.querySelectorAll('.next-phase-btn');
-            const progressFills = document.querySelectorAll('.progress-fill');
+            const progressFill = document.getElementById('progress-fill');
             const mobileMenuBtn = document.getElementById('mobile-menu-btn');
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebar-overlay');
+            const hideSidebarBtn = document.getElementById('hide-sidebar-btn');
+            const showSidebarBtn = document.getElementById('show-sidebar-btn');
+            const mainContent = document.querySelector('main');
             
             let currentChapterId = 'chapter-1';
-            let isAnimating = false; // 防止連續點擊造成的動畫崩潰
+            let isAnimating = false;
 
-            // 核心切換邏輯 (封裝成函式供導覽列與按鈕共用)
+            // 核心切換邏輯 (過場動畫與裝載條)
             function switchChapter(targetId) {
                 if (targetId === currentChapterId || isAnimating) return;
                 isAnimating = true;
@@ -523,7 +555,6 @@
                 const currentSection = document.getElementById(currentChapterId);
                 const targetSection = document.getElementById(targetId);
 
-                // 1. 更新左側導覽列的 Active 狀態
                 navLinks.forEach(nav => {
                     if (nav.getAttribute('data-target') === targetId) {
                         nav.classList.add('active-nav', 'bg-black/20', 'text-white', 'border-l-2', 'border-mecha-sensor');
@@ -534,48 +565,28 @@
                     }
                 });
 
-                // 2. 更新系統進度條 UI
-                const chapterIndex = parseInt(targetId.replace('chapter-', '')) - 1;
-                progressFills.forEach((fill, index) => {
-                    if (index <= chapterIndex) {
-                        fill.classList.remove('scale-x-0');
-                        fill.classList.add('scale-x-100');
-                    } else {
-                        fill.classList.remove('scale-x-100');
-                        fill.classList.add('scale-x-0');
-                    }
-                });
+                // 單一裝載條邏輯 (1/6 = 16.66%)
+                const chapterIndex = parseInt(targetId.replace('chapter-', ''));
+                const percentage = (chapterIndex / 6) * 100;
+                progressFill.style.width = percentage + '%';
 
-                // 3. 執行無縫動畫：舊章節先淡出 (Fade Out)
                 currentSection.classList.remove('fade-in');
                 currentSection.classList.add('fade-out');
 
-                // 4. 等待淡出結束後，再切換並淡入新章節
                 setTimeout(() => {
-                    // 徹底隱藏舊章節
                     currentSection.classList.remove('active-section', 'fade-out');
-                    
-                    // 顯示新章節並重置動畫狀態
                     targetSection.classList.add('active-section');
-                    // 強制瀏覽器重繪 (Reflow) 以確保動畫從頭播放
-                    void targetSection.offsetWidth; 
+                    void targetSection.offsetWidth; // Force reflow
                     targetSection.classList.add('fade-in');
 
-                    // 更新當前 ID
                     currentChapterId = targetId;
-
-                    // 處理手機版選單收合與滾動回頂部
-                    if (window.innerWidth < 768) {
-                        closeMobileMenu();
-                    }
-                    document.querySelector('main').scrollTop = 0;
+                    if (window.innerWidth < 768) { closeMobileMenu(); }
+                    mainContent.scrollTop = 0;
                     
-                    // 解除動畫鎖定
                     setTimeout(() => { isAnimating = false; }, 400); 
-                }, 250); // 這裡的 250ms 與 CSS 的 mechDrop 動畫時間匹配
+                }, 250); 
             }
 
-            // 綁定導覽列點擊事件
             navLinks.forEach(link => {
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -583,7 +594,6 @@
                 });
             });
 
-            // 綁定「NEXT_PHASE」按鈕點擊事件
             nextBtns.forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -591,20 +601,83 @@
                 });
             });
 
-            // 手機版選單開關邏輯
-            function openMobileMenu() {
-                sidebar.classList.remove('-translate-x-full');
-                overlay.classList.remove('hidden');
-            }
-            function closeMobileMenu() {
-                sidebar.classList.add('-translate-x-full');
-                overlay.classList.add('hidden');
-            }
+            // 手機版選單
+            function openMobileMenu() { sidebar.classList.remove('-translate-x-full'); overlay.classList.remove('hidden'); }
+            function closeMobileMenu() { sidebar.classList.add('-translate-x-full'); overlay.classList.add('hidden'); }
             mobileMenuBtn.addEventListener('click', () => {
-                if (sidebar.classList.contains('-translate-x-full')) { openMobileMenu(); } 
-                else { closeMobileMenu(); }
+                if (sidebar.classList.contains('-translate-x-full')) openMobileMenu(); else closeMobileMenu();
             });
             overlay.addEventListener('click', closeMobileMenu);
+
+            // 電腦版側邊欄隱藏/展開邏輯
+            hideSidebarBtn.addEventListener('click', () => {
+                if (window.innerWidth >= 768) {
+                    sidebar.classList.add('sidebar-hidden');
+                    // 等待側邊欄滑出後，顯示掃描按鈕
+                    setTimeout(() => {
+                        showSidebarBtn.classList.remove('hidden'); // 確保移除 display:none
+                        setTimeout(() => showSidebarBtn.classList.remove('-translate-x-full'), 10);
+                    }, 300);
+                }
+            });
+
+            showSidebarBtn.addEventListener('click', () => {
+                showSidebarBtn.classList.add('-translate-x-full');
+                setTimeout(() => {
+                    sidebar.classList.remove('sidebar-hidden');
+                    // 等待側邊欄滑入後，隱藏掃描按鈕
+                    setTimeout(() => showSidebarBtn.classList.add('hidden'), 300);
+                }, 100);
+            });
+
+            // Lightbox (全息圖鑑) 邏輯
+            const lightbox = document.getElementById('lightbox-modal');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const lightboxNoSignal = document.getElementById('lightbox-no-signal');
+            const lightboxTitle = document.getElementById('lightbox-title-text');
+            const lightboxDesc = document.getElementById('lightbox-desc');
+            const lightboxClose = document.getElementById('lightbox-close');
+
+            document.querySelectorAll('.clickable-module').forEach(module => {
+                module.addEventListener('click', () => {
+                    const src = module.getAttribute('data-img');
+                    const title = module.getAttribute('data-title');
+                    const desc = module.getAttribute('data-desc');
+
+                    if (src && src.trim() !== "") {
+                        lightboxImg.src = src;
+                        lightboxImg.classList.remove('hidden');
+                        lightboxNoSignal.classList.add('hidden');
+                        lightboxNoSignal.classList.remove('flex');
+                    } else {
+                        lightboxImg.classList.add('hidden');
+                        lightboxImg.src = "";
+                        lightboxNoSignal.classList.remove('hidden');
+                        lightboxNoSignal.classList.add('flex');
+                    }
+
+                    lightboxTitle.innerHTML = title;
+                    lightboxDesc.innerHTML = desc;
+
+                    lightbox.classList.remove('hidden');
+                    lightbox.classList.add('flex');
+                    setTimeout(() => lightbox.classList.remove('opacity-0'), 10);
+                });
+            });
+
+            // 關閉 Modal (點擊按鈕或背景)
+            lightboxClose.addEventListener('click', closeLightbox);
+            lightbox.addEventListener('click', (e) => {
+                if(e.target === lightbox) closeLightbox();
+            });
+
+            function closeLightbox() {
+                lightbox.classList.add('opacity-0');
+                setTimeout(() => {
+                    lightbox.classList.add('hidden');
+                    lightbox.classList.remove('flex');
+                }, 300);
+            }
         });
     </script>
 </body>
