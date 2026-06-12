@@ -194,14 +194,17 @@
                 <div class="prose prose-invert max-w-none text-mecha-text space-y-6 leading-relaxed">
                     
                     <div class="mb-8 flex flex-col md:flex-row gap-6 items-center bg-black/30 p-5 md:p-6 rounded-lg border-l-2 border-[#545e4b] shadow-inner">
-                        <div class="w-full md:w-1/3 h-48 md:h-56 bg-mecha-tire relative overflow-hidden hud-viewfinder p-3 shrink-0 rounded border border-[#434b3c]">
-                            <div class="absolute top-3 right-4 text-[10px] font-mono text-mecha-muted opacity-70 z-20 bg-black/50 px-1.5 rounded border border-[#545e4b]">ARCHIVE_DATA</div>
-                            <!-- 載入實體照片 gundan.jpg -->
-                            <img src="./images/gundan.jpg" alt="傳統鋼彈模型" class="w-full h-full object-cover filter grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-500 relative z-10">
+                        <div class="clickable-module w-full md:w-1/3 h-48 md:h-56 bg-mecha-tire relative overflow-hidden hud-viewfinder p-3 shrink-0 rounded border border-[#434b3c] cursor-pointer group hover:border-mecha-sensor hover:shadow-[0_0_15px_rgba(14,219,173,0.2)] transition-all"
+                             data-img="./images/gundan.jpg"
+                             data-title="ARCHIVE_DATA: 傳統鋼彈模型"
+                             data-desc="一般組裝模型往往強調必須嚴格遵循說明書上的標準設定。">
+                            <div class="absolute top-3 right-4 text-[10px] font-mono text-mecha-muted opacity-70 z-20 bg-black/50 px-1.5 rounded border border-[#545e4b] group-hover:text-mecha-sensor group-hover:border-mecha-sensor transition-colors">ARCHIVE_DATA</div>
+                            <img src="./images/gundan.jpg" alt="傳統鋼彈模型" class="w-full h-full object-contain filter grayscale opacity-60 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500 relative z-10 p-1">
                             <div class="absolute inset-0 flex flex-col items-center justify-center text-[#545e4b] z-0">
                                 <i data-lucide="image-off" class="w-8 h-8 mb-2"></i>
                                 <span class="font-mono text-xs">[ GUNDAM_IMG_MISSING ]</span>
                             </div>
+                            <div class="absolute inset-0 bg-mecha-sensor opacity-0 group-hover:opacity-10 transition-opacity z-20 mix-blend-color pointer-events-none"></div>
                         </div>
                         <div class="w-full md:w-2/3 space-y-4">
                             <h3 class="text-lg md:text-xl font-bold text-white flex items-center gap-2">
@@ -225,43 +228,36 @@
                         </h3>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="bg-mecha-surface border border-[#434b3c] rounded-lg p-3 relative shadow-inner">
+                            <div class="clickable-module bg-mecha-surface border border-[#434b3c] rounded-lg p-3 relative shadow-inner cursor-pointer group hover:border-mecha-sensor hover:shadow-[0_0_15px_rgba(14,219,173,0.2)] hover:-translate-y-1 transition-all"
+                                 data-img="./images/normal_legs.jpg"
+                                 data-title="原廠設定：標準人形型態"
+                                 data-desc="bEXM-33QB 沃爾帕諾瓦的原廠基礎人形狀態。">
                                 <div class="absolute top-4 right-4 text-[10px] font-mono text-mecha-sensor opacity-50 z-20 bg-black/50 px-1 rounded">ORIGINAL.01</div>
                                 <div class="h-48 md:h-56 bg-mecha-tire rounded flex items-center justify-center relative overflow-hidden hud-viewfinder">
-                                    <!-- 載入實體照片 normal_legs.jpg -->
-                                    <img src="./images/normal_legs.jpg" alt="原廠人形型態" class="w-full h-full object-cover filter opacity-70 hover:opacity-100 transition-all duration-300 relative z-10">
+                                    <img src="./images/normal_legs.jpg" alt="原廠人形型態" class="w-full h-full object-contain filter opacity-70 group-hover:opacity-100 transition-all duration-300 relative z-10 p-2">
                                     <div class="absolute inset-0 flex flex-col items-center justify-center text-[#545e4b] z-0">
                                         <i data-lucide="image-off" class="w-8 h-8 mb-2"></i>
                                         <span class="font-mono text-xs">[ HUMAN_FORM_MISSING ]</span>
                                     </div>
+                                    <div class="absolute inset-0 bg-mecha-sensor opacity-0 group-hover:opacity-10 transition-opacity z-20 mix-blend-color pointer-events-none"></div>
                                 </div>
-                                <p class="text-center text-sm text-mecha-muted mt-3 font-bold tracking-widest border-t border-[#434b3c] pt-2">標準人形型態</p>
+                                <p class="text-center text-sm text-mecha-muted mt-3 font-bold tracking-widest border-t border-[#434b3c] pt-2 group-hover:text-mecha-sensor transition-colors">標準人形型態</p>
                             </div>
                             
-                            <div class="bg-mecha-surface border border-[#434b3c] rounded-lg p-3 relative shadow-inner">
+                            <div class="clickable-module bg-mecha-surface border border-[#434b3c] rounded-lg p-3 relative shadow-inner cursor-pointer group hover:border-mecha-sensor hover:shadow-[0_0_15px_rgba(14,219,173,0.2)] hover:-translate-y-1 transition-all"
+                                 data-img="./images/normal_car.jpg"
+                                 data-title="原廠設定：標準四輪型態"
+                                 data-desc="bEXM-33QB 沃爾帕諾瓦的越野車輛變形狀態。">
                                 <div class="absolute top-4 right-4 text-[10px] font-mono text-mecha-sensor opacity-50 z-20 bg-black/50 px-1 rounded">ORIGINAL.02</div>
                                 <div class="h-48 md:h-56 bg-mecha-tire rounded flex items-center justify-center relative overflow-hidden hud-viewfinder">
-                                    <!-- 載入實體照片 normal_car.jpg -->
-                                    <img src="./images/normal_car.jpg" alt="原廠車輛型態" class="w-full h-full object-cover filter opacity-70 hover:opacity-100 transition-all duration-300 relative z-10">
-                                    <div class="absolute inset-0 flex flex-col items-center justify-center text-[#545e4b] z-0">
-                                        <i data-lucide="image-off" class="w-8 h-8 mb-2"></i>
-                                        <span class="font-mono text-xs">[ HUMAN_FORM_MISSING ]</span>
-                                    </div>
-                                </div>
-                                <p class="text-center text-sm text-mecha-muted mt-3 font-bold tracking-widest border-t border-[#434b3c] pt-2">標準人形型態</p>
-                            </div>
-                            
-                            <div class="bg-mecha-surface border border-[#434b3c] rounded-lg p-3 relative shadow-inner">
-                                <div class="absolute top-4 right-4 text-[10px] font-mono text-mecha-sensor opacity-50 z-20 bg-black/50 px-1 rounded">ORIGINAL.02</div>
-                                <div class="h-48 md:h-56 bg-mecha-tire rounded flex items-center justify-center relative overflow-hidden hud-viewfinder">
-                                    <!-- 載入實體照片 normal_car.jpg -->
-                                    <img src="normal_car.jpg" alt="原廠車輛型態" class="w-full h-full object-cover filter opacity-70 hover:opacity-100 transition-all duration-300 relative z-10">
+                                    <img src="./images/normal_car.jpg" alt="原廠車輛型態" class="w-full h-full object-contain filter opacity-70 group-hover:opacity-100 transition-all duration-300 relative z-10 p-2">
                                     <div class="absolute inset-0 flex flex-col items-center justify-center text-[#545e4b] z-0">
                                         <i data-lucide="image-off" class="w-8 h-8 mb-2"></i>
                                         <span class="font-mono text-xs">[ VEHICLE_FORM_MISSING ]</span>
                                     </div>
+                                    <div class="absolute inset-0 bg-mecha-sensor opacity-0 group-hover:opacity-10 transition-opacity z-20 mix-blend-color pointer-events-none"></div>
                                 </div>
-                                <p class="text-center text-sm text-mecha-muted mt-3 font-bold tracking-widest border-t border-[#434b3c] pt-2">標準四輪型態</p>
+                                <p class="text-center text-sm text-mecha-muted mt-3 font-bold tracking-widest border-t border-[#434b3c] pt-2 group-hover:text-mecha-sensor transition-colors">標準四輪型態</p>
                             </div>
                         </div>
                         
@@ -321,13 +317,12 @@
                              data-desc="保留 bEXM-33QB 沃爾帕諾瓦的高乘載特性。<br><br>我們強化了下盤關節以應對重型火砲開火時產生的強大後座力。深沙綠色的塗裝提供了良好的戰場隱蔽性。">
                             <div class="h-48 md:h-56 bg-mecha-tire flex items-center justify-center relative overflow-hidden p-4 hud-viewfinder">
                                 <div class="absolute top-4 right-5 text-[10px] md:text-xs font-mono text-mecha-sensor opacity-70 z-20 bg-black/50 px-1.5 rounded">REC_OPT.01</div>
-                                <!-- 載入實體照片 basic_mode.jpg -->
-                                <img src="./images/basic_mode.jpg" alt="沃爾帕諾瓦本體" class="w-full h-full object-cover filter brightness-90 group-hover:brightness-110 transition-all duration-300 relative z-10 rounded-sm">
+                                <img src="./images/basic_mode.jpg" alt="沃爾帕諾瓦本體" class="w-full h-full object-contain p-2 filter brightness-90 group-hover:brightness-110 transition-all duration-300 relative z-10 rounded-sm">
                                 <div class="absolute inset-0 flex flex-col items-center justify-center text-[#545e4b] z-0">
                                     <i data-lucide="image-off" class="w-8 h-8 mb-2"></i>
                                     <span class="font-mono text-xs">[ BODY_IMG_MISSING ]</span>
                                 </div>
-                                <div class="absolute inset-0 bg-mecha-sensor opacity-0 group-hover:opacity-10 transition-opacity z-20 mix-blend-color"></div>
+                                <div class="absolute inset-0 bg-mecha-sensor opacity-0 group-hover:opacity-10 transition-opacity z-20 mix-blend-color pointer-events-none"></div>
                                 <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 z-30 transition-opacity">
                                     <span class="bg-black/70 text-mecha-sensor px-3 py-1 rounded font-mono text-sm border border-mecha-sensor backdrop-blur-sm shadow-[0_0_10px_#0edbad]">ACCESS_DATA</span>
                                 </div>
@@ -344,13 +339,12 @@
                              data-desc="提供超視距打擊能力，為機體「專一重火力」理念的核心體現。<br><br><strong class='text-mecha-sensor'>>> WARNING: </strong>開火時請確保機體處於穩定立姿或展開駐鋤。">
                             <div class="h-48 md:h-56 bg-mecha-tire flex items-center justify-center relative overflow-hidden p-4 hud-viewfinder">
                                 <div class="absolute top-4 right-5 text-[10px] md:text-xs font-mono text-mecha-sensor opacity-70 z-20 bg-black/50 px-1.5 rounded">REC_OPT.02</div>
-                                <!-- 載入實體照片 big_cannon.jpg -->
-                                <img src="./images/big_cannon.jpg" alt="背部大型加農砲" class="w-full h-full object-cover filter brightness-90 group-hover:brightness-110 transition-all duration-300 relative z-10 rounded-sm">
+                                <img src="./images/big_cannon.jpg" alt="背部大型加農砲" class="w-full h-full object-contain p-2 filter brightness-90 group-hover:brightness-110 transition-all duration-300 relative z-10 rounded-sm">
                                 <div class="absolute inset-0 flex flex-col items-center justify-center text-[#545e4b] z-0">
                                     <i data-lucide="image-off" class="w-8 h-8 mb-2"></i>
                                     <span class="font-mono text-xs">[ WEAPON_IMG_MISSING ]</span>
                                 </div>
-                                <div class="absolute inset-0 bg-mecha-sensor opacity-0 group-hover:opacity-10 transition-opacity z-20 mix-blend-color"></div>
+                                <div class="absolute inset-0 bg-mecha-sensor opacity-0 group-hover:opacity-10 transition-opacity z-20 mix-blend-color pointer-events-none"></div>
                                 <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 z-30 transition-opacity">
                                     <span class="bg-black/70 text-mecha-sensor px-3 py-1 rounded font-mono text-sm border border-mecha-sensor backdrop-blur-sm shadow-[0_0_10px_#0edbad]">ACCESS_DATA</span>
                                 </div>
@@ -368,12 +362,12 @@
                             
                             <div class="w-full md:w-2/5 h-48 md:h-auto bg-mecha-tire flex items-center justify-center relative p-4 hud-viewfinder shrink-0">
                                 <div class="absolute top-4 right-5 text-[10px] md:text-xs font-mono text-mecha-sensor opacity-70 z-20 bg-black/50 px-1.5 rounded">REC_OPT.03</div>
-                                 <!-- 載入實體照片 white_arm.jpg -->
-                                 <img src="./images/white_arm.jpg" alt="戰術副腕" class="w-full h-full object-cover filter brightness-90 group-hover:brightness-110 transition-all duration-300 relative z-10 rounded-sm">
+                                 <img src="./images/white_arm.jpg" alt="戰術副腕" class="w-full h-full object-contain p-2 filter brightness-90 group-hover:brightness-110 transition-all duration-300 relative z-10 rounded-sm">
                                  <div class="absolute inset-0 flex flex-col items-center justify-center text-[#545e4b] z-0">
                                      <i data-lucide="image-off" class="w-8 h-8 mb-2"></i>
                                      <span class="font-mono text-xs">[ ARM_IMG_MISSING ]</span>
                                  </div>
+                                <div class="absolute inset-0 bg-mecha-sensor opacity-0 group-hover:opacity-10 transition-opacity z-20 mix-blend-color pointer-events-none"></div>
                                 <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 z-30 transition-opacity">
                                     <span class="bg-black/70 text-mecha-sensor px-3 py-1 rounded font-mono text-sm border border-mecha-sensor backdrop-blur-sm shadow-[0_0_10px_#0edbad]">ACCESS_DATA</span>
                                 </div>
@@ -422,12 +416,12 @@
                             </h3>
                             <div class="h-48 md:h-56 bg-mecha-tire rounded flex items-center justify-center mb-4 hud-viewfinder p-2 overflow-hidden relative">
                                  <div class="absolute top-3 right-4 text-[10px] md:text-xs font-mono text-mecha-sensor opacity-70 z-20 bg-black/40 px-1 rounded">REC_OPT.04</div>
-                                 <!-- 載入實體照片 animal_mode.jpg -->
-                                 <img src="./images/animal_mode.jpg" alt="Form_01 : 雙足重裝型態" class="w-full h-full object-cover filter brightness-90 group-hover:brightness-110 transition-all duration-300 relative z-10 rounded-sm">
+                                 <img src="./images/animal_mode.jpg" alt="Form_01 : 雙足重裝型態" class="w-full h-full object-contain p-2 filter brightness-90 group-hover:brightness-110 transition-all duration-300 relative z-10 rounded-sm">
                                  <div class="absolute inset-0 flex flex-col items-center justify-center text-[#545e4b] z-0">
                                      <i data-lucide="image-off" class="w-8 h-8 mb-2"></i>
                                      <span class="font-mono text-xs">[ FORM1_IMG_MISSING ]</span>
                                  </div>
+                                 <div class="absolute inset-0 bg-mecha-sensor opacity-0 group-hover:opacity-10 transition-opacity z-20 mix-blend-color pointer-events-none"></div>
                             </div>
                             <p class="text-xs md:text-sm text-mecha-muted border-l-2 border-[#545e4b] pl-3 line-clamp-2">適用於複雜地形推進，提供穩定的射擊基座。</p>
                         </div>
@@ -450,12 +444,12 @@
                             </h3>
                             <div class="h-48 md:h-56 bg-mecha-tire rounded flex items-center justify-center mb-4 hud-viewfinder p-2 overflow-hidden relative">
                                  <div class="absolute top-3 right-4 text-[10px] md:text-xs font-mono text-mecha-sensor opacity-70 z-20 bg-black/40 px-1 rounded">REC_OPT.05</div>
-                                 <!-- 載入實體照片 car_mode.jpg -->
-                                 <img src="./images/car_mode.jpg" alt="Form_02 : 四輪移動砲塔" class="w-full h-full object-cover filter brightness-90 group-hover:brightness-110 transition-all duration-300 relative z-10 rounded-sm">
+                                 <img src="./images/car_mode.jpg" alt="Form_02 : 四輪移動砲塔" class="w-full h-full object-contain p-2 filter brightness-90 group-hover:brightness-110 transition-all duration-300 relative z-10 rounded-sm">
                                  <div class="absolute inset-0 flex flex-col items-center justify-center text-[#545e4b] z-0">
                                      <i data-lucide="image-off" class="w-8 h-8 mb-2"></i>
                                      <span class="font-mono text-xs">[ FORM2_IMG_MISSING ]</span>
                                  </div>
+                                 <div class="absolute inset-0 bg-mecha-sensor opacity-0 group-hover:opacity-10 transition-opacity z-20 mix-blend-color pointer-events-none"></div>
                             </div>
                             <p class="text-xs md:text-sm text-mecha-muted border-l-2 border-[#545e4b] pl-3 line-clamp-2">展開四輪結構，大幅提升機動力，適合快速部署。</p>
                         </div>
